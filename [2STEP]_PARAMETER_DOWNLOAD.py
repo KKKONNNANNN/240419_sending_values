@@ -11,14 +11,6 @@ api_key = os.getenv('EkXMdOEzwJhYKIum3LRq4fF3HuY6vO3pUEqacLdnIdCxQ0vbrtVBxKkFpr8
 api_secret = os.getenv('RkGGC4u3BbI3QIIZQl6Tq3HLk9kL1hRwIguvYr58ytfbWcxmsRxVFl1ozwsEjxfp')
 client = Client(api_key, api_secret)
 
-# CSV 파일 경로
-today_date = datetime.now().strftime('%Y%m%d')
-input_csv_path = rf'/Users/hyeonwhan.ko/Desktop/BIGDATA/{today_date}_SYMBOL.csv'
-output_dir = r'/Users/hyeonwhan.ko/Desktop/BIGDATA/COINRAW'
-
-# CSV 파일 불러오기
-df = pd.read_csv(input_csv_path)
-
 # SLACK 메시지 보내기 함수
 def post_message(token, channel, text):
     response = requests.post("https://slack.com/api/chat.postMessage",
@@ -26,11 +18,19 @@ def post_message(token, channel, text):
                              data={"channel": channel, "text": text}
                              )
     print(response)
-myToken = "xoxb-6969697834503-6996943830753-7Xc0scSNRe1xLbYgvS0D5Tz7"
-today_date = datetime.now().strftime('%Y%m%d')
+myToken = "my_slack_token"
 
 # 각 심볼에 대해 빈 데이터를 채워넣고 저장
 def process_symbols():
+    
+    # CSV 파일 경로
+    today_date = datetime.now().strftime('%Y%m%d')
+    input_csv_path = r'raw-files/SYMBOL.csv'
+    output_dir = r'raw-files/COINRAW'
+
+    # CSV 파일 불러오기
+    df = pd.read_csv(input_csv_path)
+    
     for symbol in df['Symbol']:
         try:
             symbol_with_usdt = f'{symbol}USDT'

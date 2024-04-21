@@ -35,20 +35,20 @@ def save_symbols_to_s3(symbols):
     today_date = datetime.now().strftime('%Y%m%d')
     file_name = 'raw-files/SYMBOL.csv'
     s3_bucket_name = '240419-sending-values'
-    
+
     # Access Key ID와 Secret Access Key 설정
-    aws_access_key_id = 'Your_Access_Key_ID'
-    aws_secret_access_key = 'Your_Secret_Access_Key'
-    
+    aws_access_key_id = 'access_key'
+    aws_secret_access_key = 'secret_access_key'
+
     # 새로운 세션 생성
     session = boto3.Session(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key
     )
-    
+
     # 이 세션을 사용하여 S3 클라이언트 생성
     s3 = session.client('s3')
-    
+
     csv_buffer = io.StringIO()
     writer = csv.writer(csv_buffer)
     writer.writerow(['Symbol'])
@@ -63,17 +63,15 @@ def post_message_to_slack(token, channel, text):
                              data={"channel": channel, "text": text})
     print(response)
 
-
 def job():
     all_symbols = get_all_symbols()
     cleaned_symbols = clean_symbols(all_symbols)
     cleaned_symbols = clean_symbols2(cleaned_symbols)
     cleaned_symbols = sorted(set(cleaned_symbols) - {''})
     save_symbols_to_s3(cleaned_symbols)
-    myToken = "xoxb-6969697834503-6996943830753-7Xc0scSNRe1xLbYgvS0D5Tz7"
+    myToken = "my-slack-token"
     post_message_to_slack(myToken, "#rebalancing", f"{datetime.now().strftime('%Y%m%d')} 모든 코인 심볼 가져오기 완료.")
 
-# 매일 아침 9시에 실행되도록 예약
 schedule.every().day.at("09:00").do(job)
 
 while True:

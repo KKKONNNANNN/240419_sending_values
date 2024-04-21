@@ -4,6 +4,7 @@ from datetime import datetime
 import schedule
 import time
 import boto3
+import io
 
 def get_all_symbols():
     url = "https://api.binance.com/api/v3/exchangeInfo"

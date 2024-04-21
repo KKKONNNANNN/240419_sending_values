@@ -35,7 +35,20 @@ def save_symbols_to_s3(symbols):
     today_date = datetime.now().strftime('%Y%m%d')
     file_name = 'raw-files/SYMBOL.csv'
     s3_bucket_name = '240419-sending-values'
-    s3 = boto3.client('s3')
+    
+    # Access Key ID와 Secret Access Key 설정
+    aws_access_key_id = 'Your_Access_Key_ID'
+    aws_secret_access_key = 'Your_Secret_Access_Key'
+    
+    # 새로운 세션 생성
+    session = boto3.Session(
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key
+    )
+    
+    # 이 세션을 사용하여 S3 클라이언트 생성
+    s3 = session.client('s3')
+    
     csv_buffer = io.StringIO()
     writer = csv.writer(csv_buffer)
     writer.writerow(['Symbol'])
@@ -49,6 +62,7 @@ def post_message_to_slack(token, channel, text):
                              headers={"Authorization": "Bearer " + token},
                              data={"channel": channel, "text": text})
     print(response)
+
 
 def job():
     all_symbols = get_all_symbols()

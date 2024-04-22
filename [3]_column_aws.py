@@ -318,6 +318,7 @@ def process_add_symbols():
     
         # 수정된 데이터를 CSV 파일로 저장
         df.to_csv(csv_buffer, index=False)
+        s3.put_object(Bucket=bucket_name, Key=file_path, Body=csv_buffer.getvalue())
     
     print("모든 코인 부가 정보 업데이트 완료.")
     post_message(myToken, "#rebalancing", f"{today_date} 모든 코인 부가 정보 업데이트 완료.")

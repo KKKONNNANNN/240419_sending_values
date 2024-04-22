@@ -267,17 +267,7 @@ def process_add_symbols():
                 drop_ratio = calculate_drop_from_high(date_data)
                 if drop_ratio is not None:
                     df.at[index, 'drop_from_high'] = drop_ratio
-    
-        # 수정된 데이터를 CSV 파일로 저장하여 다시 S3에 업로드
-        try:
-            csv_buffer = io.StringIO()
-            df.to_csv(csv_buffer, index=False)
-            s3.put_object(Bucket=bucket_name, Key=file_path, Body=csv_buffer.getvalue())
-            print(f'Saved {file_path} data to S3 bucket')
-        except Exception as e:
-            print(f"파일 업로드 실패: {e}")
-            continue
-    
+       
         ## BTC에 20/50/60/120MA_margin 추가
         # BTC에 대한 추가 계산
         if symbol == 'BTC':
@@ -316,9 +306,15 @@ def process_add_symbols():
                     if len(date_data) >= 120:
                         df.at[index, '120MA_margin'] = calculate_120MA_margin(date_data)
     
-        # 수정된 데이터를 CSV 파일로 저장
-        df.to_csv(csv_buffer, index=False)
-        s3.put_object(Bucket=bucket_name, Key=file_path, Body=csv_buffer.getvalue())
+        # 수정된 데이터를 CSV 파일로 저장하여 다시 S3에 업로드
+        try:
+            csv_buffer = io.StringIO()
+            df.to_csv(csv_buffer, index=False)
+            s3.put_object(Bucket=bucket_name, Key=file_path, Body=csv_buffer.getvalue())
+            print(f'Saved {file_path} data to S3 bucket')
+        except Exception as e:
+            print(f"파일 업로드 실패: {e}")
+            continue
     
     print("모든 코인 부가 정보 업데이트 완료.")
     post_message(myToken, "#rebalancing", f"{today_date} 모든 코인 부가 정보 업데이트 완료.")

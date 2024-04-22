@@ -58,6 +58,8 @@ def calculate_60_day_ma(data):
 def calculate_100_day_ma(data):
     return data['close'].rolling(window=100).mean()
 
+def calculate_112_day_ma(data):
+    return data['close'].rolling(window=112).mean()
 
 def calculate_120_day_ma(data):
     return data['close'].rolling(window=120).mean()
@@ -149,6 +151,11 @@ def calculate_60MA_margin(data):
             return 0
         return (data['close'].iloc[-1] - data['60_day_ma'].iloc[-1])
 
+def calculate_112MA_margin(data):
+        if data['close'].iloc[-1] == 0:
+            return 0
+        return (data['close'].iloc[-1] - data['112_day_ma'].iloc[-1])
+
 def calculate_120MA_margin(data):
         if data['close'].iloc[-1] == 0:
             return 0
@@ -157,7 +164,7 @@ def calculate_120MA_margin(data):
 
 # 추가할 열들
 additional_columns = [
-    '3_day_ma', '20_day_ma', '30_day_ma', '50_day_ma', '60_day_ma', '100_day_ma', '120_day_ma',
+    '3_day_ma', '20_day_ma', '30_day_ma', '50_day_ma', '60_day_ma', '100_day_ma', '112_day_ma', '120_day_ma',
     '1_day_price_change', '2_day_price_change', '3_day_price_change', '4_day_price_change', '5_day_price_change',
     '6_day_price_change', '7_day_price_change',
     'RSI', 'listing_period', 'drop_from_high'
@@ -221,6 +228,10 @@ def process_add_symbols():
                 # 100일 이동평균선 계산
                 if len(date_data) >= 100:
                     df.at[index, '100_day_ma'] = calculate_100_day_ma(date_data).iloc[-1]
+
+                # 112일 이동평균선 계산
+                if len(date_data) >= 112:
+                    df.at[index, '112_day_ma'] = calculate_112_day_ma(date_data).iloc[-1]
     
                 # 120일 이동평균선 계산
                 if len(date_data) >= 120:
@@ -268,7 +279,7 @@ def process_add_symbols():
                 if drop_ratio is not None:
                     df.at[index, 'drop_from_high'] = drop_ratio
        
-        ## BTC에 20/50/60/120MA_margin 추가
+        ## BTC에 20/50/60/112/120MA_margin 추가
         # BTC에 대한 추가 계산
         if symbol == 'BTC':
     
@@ -301,7 +312,11 @@ def process_add_symbols():
                     # 60일 이동평균선 마진 계산
                     if len(date_data) >= 60:
                         df.at[index, '60MA_margin'] = calculate_60MA_margin(date_data)
-    
+
+                    # 112일 이동평균선 마진 계산
+                    if len(date_data) >= 112:
+                        df.at[index, '112MA_margin'] = calculate_112MA_margin(date_data)
+                    
                     # 120일 이동평균선 마진 계산
                     if len(date_data) >= 120:
                         df.at[index, '120MA_margin'] = calculate_120MA_margin(date_data)

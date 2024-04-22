@@ -166,8 +166,7 @@ def calculate_120MA_margin(data):
 additional_columns = [
     '3_day_ma', '20_day_ma', '30_day_ma', '50_day_ma', '60_day_ma', '100_day_ma', '112_day_ma', '120_day_ma',
     '1_day_price_change', '2_day_price_change', '3_day_price_change', '4_day_price_change', '5_day_price_change',
-    '6_day_price_change', '7_day_price_change',
-    'RSI', 'listing_period', 'drop_from_high'
+    '6_day_price_change', '7_day_price_change', 'RSI', 'listing_period', 'drop_from_high'
 ]
 
 def process_add_symbols():

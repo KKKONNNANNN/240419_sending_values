@@ -19,7 +19,7 @@ yesterdate = yester.strftime("%Y-%m-%d")
 
 n = 5  # 매수/매도 할 코인 개수
 t = 1  # 매수/매도 주기
-m = 100  # 코인 TOP 랭킹
+m = 100  # 코인 TOP 랭킹, 의미 없어짐
 d = 4  # d_day_price_change
 
 # portion 값 설정
@@ -67,26 +67,8 @@ def calculate_n_score(row, portion_values):
               ((760 - row['listing_period']) / 760) * portion_values['listing_period']
     return n_score
 
+
 def jobs():
-
-    today_date = datetime.now().strftime('%Y%m%d')
-
-    # S3 클라이언트 생성
-    aws_access_key_id = 'aws-access-key'
-    aws_secret_access_key = 'aws-secret-access-key'
-    bucket_name = '240419-sending-values'
-    file1_key = 'raw-files/TOP100(BINANCE).csv'
-
-
-    s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-
-    # 파일 내용 가져오기
-    response = s3.get_object(Bucket=bucket_name, Key=file1_key)
-    file1_data = response['Body'].read().decode('utf-8')
-
-    # StringIO를 사용하여 CSV 데이터를 pandas DataFrame으로 변환
-    df = pd.read_csv(StringIO(file1_data))
-
 
     # coin_list 생성 coin_1, coin_2,,, coin_n
     coin_list = [f'coin_{i + 1}' for i in range(n)]
@@ -102,8 +84,30 @@ def jobs():
 
     # portion 값의 합이 1인지 확인하여 처리
     if abs(portion_sum - 1) < 1e-10:
-        # 오늘 날짜 표 가지고오기
-        coin_list_for_date = df.loc[df['Date'] == yesterdate, ['Date', 'RANK', 'Symbol']]
+        today_date = datetime.now()
+        yester = today_date - timedelta(days=1)
+        yesterdate = yester.strftime("%Y-%m-%d")
+
+        # S3 클라이언트 생성
+        aws_access_key_id = 'your-access-key'
+        aws_secret_access_key = 'your-secret-access-key'
+        bucket_name = '240419-sending-values'
+        coin_raw_dir = 'raw-files/COINRAW'  # COINRAW 폴더 경로
+
+        s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+        # S3의 raw-files/COINRAW 폴더에서 파일 목록 가져오기
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=coin_raw_dir)
+
+        # 파일 목록에서 symbol 추출하여 DataFrame 생성(TOP100(BINANCE)파일 미사용)
+        coin_list_for_date = pd.DataFrame(columns=['Date', 'Symbol'])
+        for obj in response.get('Contents', []):
+            symbol = os.path.splitext(os.path.basename(obj['Key']))[0]
+            # 빈 칸이 포함된 첫 번째 행 제외
+            if symbol.strip() != '':
+                coin_list_for_date = pd.concat(
+                    [coin_list_for_date, pd.DataFrame({'Date': [yesterdate], 'Symbol': [symbol]})], ignore_index=True)
+
         # 열추가
         additional_columns = ['open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
                               'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume',

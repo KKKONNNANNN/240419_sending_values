@@ -24,7 +24,6 @@ def post_message(token, channel, text):
 
 
 myToken = "your-slack-token"
-today_date = datetime.now().strftime('%Y%m%d')
 
 # S3 클라이언트 생성
 aws_access_key_id = 'your-S3-key'
@@ -331,6 +330,7 @@ def process_add_symbols():
             continue
     
     print("모든 코인 부가 정보 업데이트 완료.")
+    today_date = datetime.now().strftime('%Y%m%d')
     post_message(myToken, "#rebalancing", f"{today_date} 모든 코인 부가 정보 업데이트 완료.")
 
 

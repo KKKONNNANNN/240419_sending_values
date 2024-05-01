@@ -15,7 +15,7 @@ import math
 # BINANCE API 엔드포인트와 키 설정
 API_ENDPOINT = "https://api.binance.com/api/v3"
 API_KEY = "API_KEY"
-API_SECRET = "SECRET_KEY"
+API_SECRET = "API_SECRET"
 
 ################################################################
 ##############################변수설정###########################
@@ -67,7 +67,7 @@ def post_message(token, channel, text):
     print(response)
 
 
-myToken = "SLACKS_TOKEN"
+myToken = "SLAC_TOKEN"
 
 def calculate_n_score(row, portion_values):
     n_score = (row[f'{d}_day_price_change'] / 100) * portion_values[f'{d}_day_price_change'] + \
@@ -101,6 +101,7 @@ def get_coin_balance(coin):
     coin_balance = next((asset for asset in account_info.get('balances', []) if asset.get('asset') == coin), None)
     if coin_balance is None:
         print(f"No balance found for {coin}.")
+        post_message(myToken, "#rebalancing", f"코인 보유 정보 가져오기 에러발생 : {account_info}")
     return coin_balance
 
 
@@ -119,6 +120,7 @@ def get_coin_price(coin):
     except KeyError:
         # 'price' 키가 없는 경우
         print(f"Warning: 'price' key not found in response for {coin}. Using default value.")
+        post_message(myToken, "#rebalancing", f"코인 가격 가져오기 에러발생 : {response_json}")
         coin_price = 0  # 또는 다른 기본값 설정
 
     return coin_price
@@ -264,8 +266,8 @@ def jobs():
     today_date = datetime.now().strftime("%Y-%m-%d")
 
     # S3 클라이언트 생성
-    aws_access_key_id = 'ACCESS_KEY'
-    aws_secret_access_key = 'ACCESS_SECRET_KEY'
+    aws_access_key_id = 'API_KEY'
+    aws_secret_access_key = 'API_SECRET'
     bucket_name = '240419-sending-values'
     file1_key = 'raw-files/TOP100(BINANCE).csv'
 
@@ -446,8 +448,8 @@ def jobs():
                 print("112MA 미만으로, 매수는 진행하지 않음")
                 post_message(myToken, "#rebalancing", f"* 112MA 미만으로, 매수는 진행하지 않음 ")
 
-# 매일 10:18에 jobs 함수 실행
-schedule.every().day.at("10:18").do(jobs)
+# 매일 10:20에 jobs 함수 실행
+schedule.every().day.at("10:20").do(jobs)
 
 while True:
     schedule.run_pending()

@@ -14,8 +14,8 @@ import math
 
 # BINANCE API 엔드포인트와 키 설정
 API_ENDPOINT = "https://api.binance.com/api/v3"
-API_KEY = "API_KEY"
-API_SECRET = "API_SECRET"
+API_KEY = "API"
+API_SECRET = "SECRET_API"
 
 ################################################################
 ##############################변수설정###########################
@@ -47,6 +47,8 @@ portion_values = {
 
 # 시작 일자 기입
 
+stt_date = datetime.now().strftime("%Y-%m-%d")
+
 def get_buy_sell_days():
     stt_date = datetime.now()
     # buy&sell days
@@ -67,7 +69,7 @@ def post_message(token, channel, text):
     print(response)
 
 
-myToken = "SLAC_TOKEN"
+myToken = "SLACK"
 
 def calculate_n_score(row, portion_values):
     n_score = (row[f'{d}_day_price_change'] / 100) * portion_values[f'{d}_day_price_change'] + \
@@ -101,7 +103,9 @@ def get_coin_balance(coin):
     coin_balance = next((asset for asset in account_info.get('balances', []) if asset.get('asset') == coin), None)
     if coin_balance is None:
         print(f"No balance found for {coin}.")
-        post_message(myToken, "#rebalancing", f"코인 보유 정보 가져오기 에러발생 : {account_info}")
+        post_message(myToken, "#rebalancing", f"* 코인 보유 정보 가져오기 에러발생 : {account_info}")
+        return 0
+    
     return coin_balance
 
 
@@ -120,7 +124,7 @@ def get_coin_price(coin):
     except KeyError:
         # 'price' 키가 없는 경우
         print(f"Warning: 'price' key not found in response for {coin}. Using default value.")
-        post_message(myToken, "#rebalancing", f"코인 가격 가져오기 에러발생 : {response_json}")
+        post_message(myToken, "#rebalancing", f"* 코인 가격 가져오기 에러발생 : {response_json}")
         coin_price = 0  # 또는 다른 기본값 설정
 
     return coin_price
@@ -188,19 +192,19 @@ def buy_coin(coin, ratio):
         if get_10n(coin_price) > 0:
             if buy_USDT > 10:
                 print(f"*{coin} 매수.")
-                post_message(myToken,"#rebalancing",f"*{coin} 매수. {buy_USDT}$")
+                post_message(myToken,"#rebalancing",f"* {coin} 매수. {buy_USDT}$")
                 return create_order(coin + "USDT", "BUY", str(buy_quantity))
             else :
-                print(f"* 보유 USDT : {round(coin_balance_USDT, 2)}, {ratio}배 가치가 10$ 미만입니다.")
-                post_message(myToken, "#rebalancing", f"* 보유 USDT : {round(coin_balance_USDT, 2)}, {ratio}배 가치가 10$ 미만으로 매도 실패.")
+                print(f"* 보유 USDT : {round(coin_balance_USDT,2)}, {ratio}배 가치가 10$ 미만으로 {coin} 매수 미진행.")
+                post_message(myToken, "#rebalancing", f"* 보유 USDT : {round(coin_balance_USDT,2)}, {ratio}배 가치가 10$ 미만으로 {coin} 매수 미진행.")
         else:
             if buy_USDT > 10:
                 print(f"*{coin} 매수.")
-                post_message(myToken,"#rebalancing",f"*{coin} 매수. {buy_USDT}$")
+                post_message(myToken,"#rebalancing",f"* {coin} 매수. {buy_USDT}$")
                 return create_order(coin + "USDT", "BUY", str(buy_quantity))
             else :
-                print(f"* 보유 USDT : {round(coin_balance_USDT,2)}, {ratio}배 가치가 10$ 미만입니다.")
-                post_message(myToken, "#rebalancing", f"* 보유 USDT : {round(coin_balance_USDT,2)}, {ratio}배 가치가 10$ 미만으로 매도 실패.")
+                print(f"* 보유 USDT : {round(coin_balance_USDT,2)}, {ratio}배 가치가 10$ 미만으로 {coin} 매수 미진행.")
+                post_message(myToken, "#rebalancing", f"* 보유 USDT : {round(coin_balance_USDT,2)}, {ratio}배 가치가 10$ 미만으로 {coin} 매수 미진행.")
     else:
         print("Failed to get USDT balance information.")
 
@@ -215,20 +219,20 @@ def sell_coin(coin):
             sell_quantity = floor_to_decimal(coin_balance * 0.999,get_10n(coin_price))
             if coin_price * coin_balance > 10:
                 print(f"*{coin} 매도.")
-                post_message(myToken, "#rebalancing", f"*{coin} 매도. 개수 : {sell_quantity} 가격 : {coin_price}")
+                post_message(myToken, "#rebalancing", f"* {coin} 매도. 개수 : {sell_quantity} 가격 : {coin_price}")
                 return create_order(coin + "USDT", "SELL", str(sell_quantity))
             else:
                 print(f"* {coin}의 가치가 10$ 미만입니다.")
-                post_message(myToken, "#rebalancing", f"*{coin}의 가치가 10$ 미만으로 매도 실패.")
+                post_message(myToken, "#rebalancing", f"* {coin}의 가치가 10$ 미만으로 매도 미진행.")
         else :
             sell_quantity = floor_to_n(coin_balance * 0.999, get_10n(coin_price)*(-1))
             if coin_price * coin_balance > 10:
                 print(f"*{coin} 매도.")
-                post_message(myToken, "#rebalancing", f"*{coin} 매도. 개수 : {sell_quantity} 가격 : {coin_price}")
+                post_message(myToken, "#rebalancing", f"* {coin} 매도. 개수 : {sell_quantity} 가격 : {coin_price}")
                 return create_order(coin + "USDT", "SELL", str(sell_quantity))
             else:
                 print(f"* {coin}의 가치가 10$ 미만입니다.")
-                post_message(myToken, "#rebalancing", f"*{coin}의 가치가 10$ 미만으로 매도 실패.")
+                post_message(myToken, "#rebalancing", f"* {coin}의 가치가 10$ 미만으로 매도 미진행.")
     else:
         print("Failed to get coin balance information.")
 
@@ -255,8 +259,17 @@ coin_RSI_list_y = [f'{yesterdate}_coin_RSI_y_{i + 1}' for i in range(n)]
 # coin_num_list_y 생성 coin_num_1, coin_num_2,,, coin_num_n
 coin_close_list_y = [f'{yesterdate}_coin_close_y_{i + 1}' for i in range(n)]
 
-coin_list_y[0] = "TRX"
-coin_list_y[1] = "LDO"
+
+# 코인 리스트와 해당 코인의 값 리스트 생성
+coin_columns = [f'Coin{i+1}' for i in range(n)]
+coin_value_columns = [f'Coin{i+1}_value' for i in range(n)]
+
+# 데이터프레임 생성
+
+df_final = pd.DataFrame(columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset', 'Multiple'])
+
+coin_list_y[0] = "W"
+coin_list_y[1] = "OP"
 
 def jobs():
     # ustt_utc와 uend_utc 설정 2019-01-10부터 가능
@@ -266,8 +279,8 @@ def jobs():
     today_date = datetime.now().strftime("%Y-%m-%d")
 
     # S3 클라이언트 생성
-    aws_access_key_id = 'API_KEY'
-    aws_secret_access_key = 'API_SECRET'
+    aws_access_key_id = 'ACCESS'
+    aws_secret_access_key = 'SECRET'
     bucket_name = '240419-sending-values'
     file1_key = 'raw-files/TOP100(BINANCE).csv'
 
@@ -388,6 +401,22 @@ def jobs():
         btc_60MA = round(btc_row.iloc[0]['60MA_margin'], 1)
         btc_112MA = round(btc_row.iloc[0]['112MA_margin'], 1)
         btc_120MA = round(btc_row.iloc[0]['120MA_margin'], 1)
+        
+        post_message(myToken, "#rebalancing", f"* {today_date} 09:00 매수 가이드 ")
+        post_message(myToken, "#rebalancing", f"코인 {n}개, {d}day {portion_values[f'{d}_day_price_change']}, RSI {portion_values['RSI']} 기준")
+        post_message(myToken, "#rebalancing", f"TICKER  : {coin_list}")
+        post_message(myToken, "#rebalancing", f"1day변화 : {coin_1chng_list} [%]")        
+        post_message(myToken, "#rebalancing", f"{d}day변화 : {coin_chng_list} [%]")
+        post_message(myToken, "#rebalancing", f"7day변화 : {coin_7chng_list} [%]")        
+        post_message(myToken, "#rebalancing", f"RSI           : {coin_RSI_list}")
+        post_message(myToken, "#rebalancing", f"* BTC 정보")
+        post_message(myToken, "#rebalancing", f"1day:{btc_1chng},   3day:{btc_3chng},   7day:{btc_7chng} [%]")
+        post_message(myToken, "#rebalancing", f" 20MA 기준 : {btc_20MA} $")
+        post_message(myToken, "#rebalancing", f" 50MA 기준 : {btc_50MA} $")
+        post_message(myToken, "#rebalancing", f" 60MA 기준 : {btc_60MA} $")
+        post_message(myToken, "#rebalancing", f" 112MA 기준 : {btc_112MA} $")
+        post_message(myToken, "#rebalancing", f"120MA 기준 : {btc_120MA} $")
+        post_message(myToken, "#rebalancing", f" ")        
 
         # 거래변수 = 0
         exchange = 0
@@ -415,7 +444,7 @@ def jobs():
                             # no_sell_coin_list에 추가
                             no_sell_coin_list.append(coin_list_y[i])
                             print(f"{coin_list_y[i]} 오늘과 동일한 coin. 매도 미진행.")
-                            post_message(myToken, "#rebalancing", f"{coin_list_y[i]} 어제와 동일한 coin. 매도 미진행.")
+                            post_message(myToken, "#rebalancing", f"* {coin_list_y[i]} 어제와 동일한 coin. 매도 미진행.")
                     else:
                         continue
 
@@ -433,24 +462,61 @@ def jobs():
                         # no_buy_coin_list 에 추가
                         no_buy_coin_list.append(coin_list[i])
                         print(f"{coin_list[i]} 어제와 동일한 coin. 매수 미진행.")
-                        post_message(myToken, "#rebalancing", f"{coin_list[i]} 어제와 동일한 coin. 매수 미진행.")
+                        post_message(myToken, "#rebalancing", f"* {coin_list[i]} 어제와 동일한 coin. 매수 미진행.")
             # 오늘의 코인에 어제 코인 할당
             else:
                 for i in range(n):
                     coin_list[i] = coin_list_y[i]
                     print("매도/매수날짜에 해당하지 않아 거래 미진행.")
-                    post_message(myToken, "#rebalancing", f"매도/매수 날짜에 해당하지 않아 거래 미진행.")
+                    post_message(myToken, "#rebalancing", f"* 매도/매수 날짜에 해당하지 않아 거래 미진행.")
 
         # 112MA 음수, 매도 진행
         else:
             for i in range(n):
                 sell_coin(coin_list_y[i])
                 print("112MA 미만으로, 매수는 진행하지 않음")
-                post_message(myToken, "#rebalancing", f"* 112MA 미만으로, 매수는 진행하지 않음 ")
+                post_message(myToken, "#rebalancing", f"* 112MA 미만으로, 매수는 미진행. ")
+                
 
-# 매일 10:20에 jobs 함수 실행
-schedule.every().day.at("10:20").do(jobs)
+        
+        # 데이터프레임에 날짜 추가
+        df_final.loc[len(df_final), 'Date'] = today_date
+        
+        # 각 코인과 가치, USDT, 총 자산 추가
+        for i in range(n):
+            coin_price = get_coin_price(coin_list[i])
+            coin_balance_info = get_coin_balance(coin_list[i])
+            df_final.loc[len(df_final)-1, coin_columns[i]] = coin_list[i]
+            df_final.loc[len(df_final)-1, coin_value_columns[i]] = round(coin_price * float(coin_balance_info['free']) ,2)
+            
+        # USDT 값 추가
+        usdt_balance_info = get_coin_balance("USDT")
+        if usdt_balance_info is not None:
+            usdt_balance = round(float(usdt_balance_info['free']),2)
+            df_final.loc[len(df_final)-1, 'USDT'] = usdt_balance
+        else:
+            print("Failed to get USDT balance information.")
+        
+        # 총 자산 계산 및 추가
+        total_asset = round(sum([df_final.loc[len(df_final) - 1, coin_value_columns[i]] for i in range(n)], df_final.loc[len(df_final) - 1, 'USDT']),2)
+        df_final.loc[len(df_final) - 1, 'Total_Asset'] = total_asset
+        
+        # 현 자산 배수 계산
+        multiple = round(total_asset / df_final.loc[0, 'Total_Asset'],2)
+        df_final.loc[len(df_final) - 1, 'Multiple'] = multiple  
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+        post_message(myToken, "#rebalancing", f" ")      
+        post_message(myToken, "#rebalancing", f"거래 {len(df_final)}일차 자산 : {total_asset} $")
+        post_message(myToken, "#rebalancing", f"{stt_date} 대비 {multiple}배")
+
+
+        # 데이터프레임 출력
+        print(df_final)
+                
+        
+        # 어제 코인 리스트에 오늘 코인 할당
+        for i in range(n):
+            coin_list_y[i] = coin_list[i]
+
+
+jobs()

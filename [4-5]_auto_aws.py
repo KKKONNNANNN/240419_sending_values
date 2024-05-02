@@ -518,5 +518,9 @@ def jobs():
         for i in range(n):
             coin_list_y[i] = coin_list[i]
 
+# 매일 10:20에 job 함수 실행
+schedule.every().day.at("10:20").do(jobs)
 
-jobs()
+while True:
+    schedule.run_pending()
+    time.sleep(1)

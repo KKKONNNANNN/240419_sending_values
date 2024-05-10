@@ -493,7 +493,7 @@ def CODE() :
         except Exception as e:
             print(f'Error processing {symbol_with_usdt}: {e}')
             # SLACK 메시지 보내기
-            post_message(myToken, "#rebalancing", f"{today_date} 에러 발생.")
+            post_message(myToken, "#rebalancing", f"{today_date} {symbol} 에러 발생.")
     print(f"{today_date} 각 코인 가격 업데이트 완료.")
     post_message(myToken, "#rebalancing", f"{today_date} 각 코인 가격 업데이트 완료.")
     
@@ -909,3 +909,10 @@ def CODE() :
         # 어제 코인 리스트에 오늘 코인 할당
         for i in range(n):
             coin_list_y[i] = coin_list[i]
+
+# 매일 09:01에 CODE 함수 실행
+schedule.every().day.at("09:01").do(CODE)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)

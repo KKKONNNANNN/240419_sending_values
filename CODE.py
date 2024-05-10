@@ -493,7 +493,8 @@ def CODE() :
         except Exception as e:
             print(f'Error processing {symbol_with_usdt}: {e}')
             # SLACK 메시지 보내기
-            post_message(myToken, "#rebalancing", f"{today_date} {symbol} 에러 발생.")
+            if symbol != 'USDT' :
+                post_message(myToken, "#rebalancing", f"{today_date} {symbol} 에러 발생.")
     print(f"{today_date} 각 코인 가격 업데이트 완료.")
     post_message(myToken, "#rebalancing", f"{today_date} 각 코인 가격 업데이트 완료.")
     

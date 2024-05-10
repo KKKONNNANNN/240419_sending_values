@@ -49,22 +49,22 @@ def load_data():
         loaded_data = json.load(f)
     return loaded_data
 
-# SLACK API 설정
-myToken = loaded_data['STOKEN']
-# Binance API 키 설정
-api_key = os.getenv(loaded_data['B_API'])
-api_secret = os.getenv(loaded_data['B_SEC'])
-client = Client(api_key, api_secret)
-# S3 클라이언트 생성
-aws_access_key_id = loaded_data['S3_API']
-aws_secret_access_key = loaded_data['S3_SEC']
-s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-
-today_date = datetime.now().strftime('%Y%m%d')
 
 if __name__ == "__main__":
-    loaded_data = load_data()
-#    print(loaded_data['B_API'])
+    loaded_data = load_data()  #데이터 로드
+    # SLACK API 설정
+    myToken = loaded_data['STOKEN']
+    # Binance API 키 설정
+    api_key = loaded_data['B_API']
+    api_secret = loaded_data['B_SEC']
+    client = Client(api_key, api_secret)
+    # S3 클라이언트 생성
+    aws_access_key_id = loaded_data['S3_API']
+    aws_secret_access_key = loaded_data['S3_SEC']
+    s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+    today_date = datetime.now().strftime('%Y%m%d')
+
 
 def post_message(token, channel, text):
     response = requests.post("https://slack.com/api/chat.postMessage",

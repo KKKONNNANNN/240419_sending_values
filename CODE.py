@@ -66,6 +66,8 @@ if __name__ == "__main__":
 
     today_date = datetime.now().strftime('%Y%m%d')
 
+# BINANCE API 엔드포인트와 키 설정
+API_ENDPOINT = "https://api.binance.com/api/v3"
 
 def post_message(token, channel, text):
     response = requests.post("https://slack.com/api/chat.postMessage",
@@ -445,8 +447,8 @@ df_final = pd.DataFrame(
     columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset',
                                                                                                   'Multiple'])
 
-coin_list_y[0] = "RNDR"
-coin_list_y[1] = "RUNE"
+coin_list_y[0] = "WLD"
+coin_list_y[1] = "RNDR"
 
 
 def jjobs():
@@ -465,6 +467,7 @@ def jjobs():
     cleaned_symbols = clean_symbols(all_symbols)
     cleaned_symbols = clean_symbols2(cleaned_symbols)
     cleaned_symbols = sorted(set(cleaned_symbols) - {''})
+
     # print(cleaned_symbols)
     print(f"{today_date} 코인 목록 가져오기 완료.")
     post_message(myToken, "#rebalancing", f"{today_date} 코인 목록 가져오기 완료.")
@@ -692,8 +695,6 @@ def jjobs():
 
     ######## DF 생성하고, 매도/매수하기 #########
 
-    # BINANCE API 엔드포인트와 키 설정
-    API_ENDPOINT = "https://api.binance.com/api/v3"
     # 시작 일자 기입
     stt_date = datetime.now().strftime("%Y-%m-%d")
 

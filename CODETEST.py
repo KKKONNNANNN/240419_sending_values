@@ -447,8 +447,8 @@ df_final = pd.DataFrame(
     columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset',
                                                                                                   'Multiple'])
 
-coin_list_y[0] = "FLOKI"
-coin_list_y[1] = "PEPE"
+coin_list_y[0] = "PEPE"
+coin_list_y[1] = "FLOKI"
 
 
 todaydate = datetime.now()

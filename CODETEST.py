@@ -1,4 +1,130 @@
+import json
+import os
+import pandas as pd
+import csv
+import requests
+from binance.client import Client
+from datetime import datetime, timedelta
+import schedule
+import boto3
+import time
+import io
+from botocore.exceptions import ClientError  # ClientError 임포트 추가
+from io import StringIO  # io 모듈 임포트 추가
+import hashlib
+import hmac
+from urllib.parse import urlencode
+import math
 
+################################################################
+##############################변수설정###########################
+################################################################
+
+n = 2  # 매수/매도 할 코인 개수
+t = 1  # 매수/매도 주기
+m = 100  # 코인 TOP 랭킹
+d = 4  # d_day_price_change
+
+# portion 값 설정
+portion_values = {
+    f'{d}_day_price_change': 0.7,
+    '3_day_ma': 0,
+    '20_day_ma': 0,
+    '30_day_ma': 0,
+    '50_day_ma': 0,
+    '60_day_ma': 0,
+    '100_day_ma': 0,
+    '120_day_ma': 0,
+    'RSI': 0.3,
+    'listing_period': 0
+}
+
+
+################################################################
+##############################변수설정###########################
+################################################################
+
+
+def load_data():
+    with open('data.json', 'r') as f:
+        loaded_data = json.load(f)
+    return loaded_data
+
+
+if __name__ == "__main__":
+    loaded_data = load_data()  # 데이터 로드
+    # SLACK API 설정
+    myToken = loaded_data['STOKEN']
+    # Binance API 키 설정
+    api_key = loaded_data['B_API']
+    api_secret = loaded_data['B_SEC']
+    client = Client(api_key, api_secret)
+    # S3 클라이언트 생성
+    aws_access_key_id = loaded_data['S3_API']
+    aws_secret_access_key = loaded_data['S3_SEC']
+    s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+    today_date = datetime.now().strftime('%Y%m%d')
+
+# BINANCE API 엔드포인트와 키 설정
+API_ENDPOINT = "https://api.binance.com/api/v3"
+
+def post_message(token, channel, text):
+    response = requests.post("https://slack.com/api/chat.postMessage",
+                             headers={"Authorization": "Bearer " + token},
+                             data={"channel": channel, "text": text})
+    print(response)
+
+
+# binance에서 모든 symbol 얻기
+def get_all_symbols():
+    url = "https://api.binance.com/api/v3/exchangeInfo"
+    response = requests.get(url)
+    data = response.json()
+    symbols = [symbol_info['symbol'] for symbol_info in data['symbols']]
+    return symbols
+
+
+# 끝자리 USDT인것들만 추출
+def clean_symbols(symbols):
+    cleaned_symbols = []
+    for symbol in symbols:
+        if symbol[-4:] == 'USDT':
+            cleaned_symbols.append(symbol[:-4])
+    return cleaned_symbols
+
+
+# DOWN/BEAR/BULL/UP 거르기
+def clean_symbols2(symbols):
+    cleaned_symbols = []
+    for symbol in symbols:
+        if symbol[-4:] in ['DOWN', 'BEAR', 'BULL']:
+            cleaned_symbols.append(symbol[:-4])
+        elif symbol[-2:] == 'UP' and symbol != 'JUP':
+            cleaned_symbols.append(symbol[:-2])
+        else:
+            cleaned_symbols.append(symbol)
+    return cleaned_symbols
+
+
+# 각 열의 계산 함수들
+def calculate_3_day_ma(data):
+    return data['close'].rolling(window=3).mean()
+
+
+def calculate_20_day_ma(data):
+    return data['close'].rolling(window=20).mean()
+
+
+def calculate_30_day_ma(data):
+    return data['close'].rolling(window=30).mean()
+
+
+def calculate_50_day_ma(data):
+    return data['close'].rolling(window=50).mean()
+
+
+def calculate_60_day_ma(data):
     return data['close'].rolling(window=60).mean()
 
 
@@ -321,8 +447,9 @@ df_final = pd.DataFrame(
     columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset',
                                                                                                   'Multiple'])
 
-coin_list_y[0] = "WLD"
-coin_list_y[1] = "RNDR"
+coin_list_y[0] = "FLOKI"
+coin_list_y[1] = "PEPE"
+
 
 todaydate = datetime.now()
 yester = todaydate - timedelta(days=1)

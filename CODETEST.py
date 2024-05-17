@@ -447,7 +447,7 @@ df_final = pd.DataFrame(
     columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset',
                                                                                                   'Multiple'])
 
-coin_list_y[0] = "PEPE"
+coin_list_y[0] = "NEAR"
 coin_list_y[1] = "FLOKI"
 
 
@@ -458,11 +458,39 @@ try :
     yesterdate = yester.strftime("%Y-%m-%d")
     today_date = datetime.now().strftime("%Y-%m-%d")
 
+    # S3 클라이언트 생성
+    bucket_name = '240419-sending-values'
+    file1_key = 'raw-files/TOP100(BINANCE).csv'
+
+    s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+    # 파일 내용 가져오기
+    response = s3.get_object(Bucket=bucket_name, Key=file1_key)
+    file1_data = response['Body'].read().decode('utf-8')
+
+    # StringIO를 사용하여 CSV 데이터를 pandas DataFrame으로 변환
+    df = pd.read_csv(StringIO(file1_data))
+
+    # 오늘 날짜 표 가지고오기
+    coin_list_for_date = df.loc[df['Date'] == yesterdate, ['Date', 'RANK', 'Symbol']]
+    # 열추가
+    additional_columns = ['open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
+                          'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume',
+                          'ignore', '3_day_ma', '20_day_ma', '30_day_ma', '50_day_ma', '60_day_ma',
+                          '100_day_ma', '112_day_ma', '120_day_ma', '1_day_price_change', '2_day_price_change',
+                          '3_day_price_change', '4_day_price_change',
+                          '5_day_price_change', '6_day_price_change', '7_day_price_change', 'RSI', 'listing_period'
+                          ]
+    coin_list_for_date = pd.concat([coin_list_for_date, pd.DataFrame(columns=additional_columns)], axis=1)
+
+
     ######## SYMBOL들 저장하기 #########
     all_symbols = get_all_symbols()
     cleaned_symbols = clean_symbols(all_symbols)
     cleaned_symbols = clean_symbols2(cleaned_symbols)
     cleaned_symbols = sorted(set(cleaned_symbols) - {''})
+    # coin_list_for_date에 있는 것들만
+    cleaned_symbols = sorted(set(cleaned_symbols) & set(coin_list_for_date['Symbol']))
 
     # print(cleaned_symbols)
     print(f"{today_date} 코인 목록 가져오기 완료.")
@@ -712,18 +740,7 @@ try :
     yesterdate = yester.strftime("%Y-%m-%d")
     today_date = datetime.now().strftime("%Y-%m-%d")
 
-    # S3 클라이언트 생성
-    bucket_name = '240419-sending-values'
-    file1_key = 'raw-files/TOP100(BINANCE).csv'
 
-    s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-
-    # 파일 내용 가져오기
-    response = s3.get_object(Bucket=bucket_name, Key=file1_key)
-    file1_data = response['Body'].read().decode('utf-8')
-
-    # StringIO를 사용하여 CSV 데이터를 pandas DataFrame으로 변환
-    df = pd.read_csv(StringIO(file1_data))
 
     coin_list = f"{today_date}_coin_list"
     coin_close_list = f"{today_date}_coin_close_list"
@@ -745,20 +762,18 @@ try :
 
     # portion 값의 합 계산
     portion_sum = sum(portion_values.values())
+    # additional_columns 재정의
+    additional_columns = ['open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
+                          'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume',
+                          'ignore', '3_day_ma', '20_day_ma', '30_day_ma', '50_day_ma', '60_day_ma',
+                          '100_day_ma', '112_day_ma', '120_day_ma', '1_day_price_change', '2_day_price_change',
+                          '3_day_price_change', '4_day_price_change',
+                          '5_day_price_change', '6_day_price_change', '7_day_price_change', 'RSI', 'listing_period'
+                          ]
 
     # portion 값의 합이 1인지 확인하여 처리
     if abs(portion_sum - 1) < 1e-10:
-        # 오늘 날짜 표 가지고오기
-        coin_list_for_date = df.loc[df['Date'] == yesterdate, ['Date', 'RANK', 'Symbol']]
-        # 열추가
-        additional_columns = ['open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume',
-                              'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume',
-                              'ignore', '3_day_ma', '20_day_ma', '30_day_ma', '50_day_ma', '60_day_ma',
-                              '100_day_ma', '112_day_ma', '120_day_ma', '1_day_price_change', '2_day_price_change',
-                              '3_day_price_change', '4_day_price_change',
-                              '5_day_price_change', '6_day_price_change', '7_day_price_change', 'RSI', 'listing_period'
-                              ]
-        coin_list_for_date = pd.concat([coin_list_for_date, pd.DataFrame(columns=additional_columns)], axis=1)
+
         # 각 파일에서 값 채우기
 
         for index, row in coin_list_for_date.iterrows():
@@ -784,8 +799,7 @@ try :
 
                 # n스코어 계산
         # n_Score 열 추가 및 값 계산
-        coin_list_for_date['n_Score'] = coin_list_for_date.apply(lambda row: calculate_n_score(row, portion_values),
-                                                                 axis=1)
+        coin_list_for_date['n_Score'] = coin_list_for_date.apply(lambda row: calculate_n_score(row, portion_values),axis=1)
         # n_Score_Rank 열 추가 및 값 기입
         coin_list_for_date['n_Score_Rank'] = coin_list_for_date['n_Score'].rank(method='first', ascending=False)
 

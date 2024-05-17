@@ -450,7 +450,7 @@ df_final = pd.DataFrame(
 coin_list_y[0] = "NEAR"
 coin_list_y[1] = "FLOKI"
 
-def jjobs :
+def jjobs() :
 
     global todaydate
     global yester

@@ -452,10 +452,6 @@ coin_list_y[1] = "FLOKI"
 
 
 try :
-    global todaydate
-    global yester
-    global yesterdate
-    global today_date
 
     todaydate = datetime.now()
     yester = todaydate - timedelta(days=1)

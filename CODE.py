@@ -21,9 +21,10 @@ import math
 ################################################################
 
 n = 2  # 매수/매도 할 코인 개수
+d = 4  # d_day_price_change
 t = 1  # 매수/매도 주기
 m = 100  # 코인 TOP 랭킹
-d = 4  # d_day_price_change
+
 
 # portion 값 설정
 portion_values = {
@@ -847,7 +848,7 @@ def jjobs() :
     
             post_message(myToken, "#rebalancing", f"* {today_date} 09:00 매수 가이드 ")
             post_message(myToken, "#rebalancing",
-                         f"코인 {n}개, {d}day {portion_values[f'{d}_day_price_change']}, RSI {portion_values['RSI']} 기준")
+                         f"ndt : {n}-{d}-{t}, d {portion_values[f'{d}_day_price_change']}, RSI {portion_values['RSI']} 기준")
             post_message(myToken, "#rebalancing", f"TICKER  : {coin_list}")
             post_message(myToken, "#rebalancing", f"1day변화 : {coin_1chng_list} [%]")
             post_message(myToken, "#rebalancing", f"{d}day변화 : {coin_chng_list} [%]")

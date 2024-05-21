@@ -20,7 +20,7 @@ import math
 ##############################변수설정###########################
 ################################################################
 
-n = 2  # 매수/매도 할 코인 개수
+n = 1  # 매수/매도 할 코인 개수
 d = 4  # d_day_price_change
 t = 1  # 매수/매도 주기
 m = 100  # 코인 TOP 랭킹
@@ -447,9 +447,19 @@ coin_value_columns = [f'Coin{i + 1}_value' for i in range(n)]
 df_final = pd.DataFrame(
     columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset',
                                                                                                   'Multiple'])
+# buy_sell_days 생성
+def get_buy_sell_days():
+    stt_date = datetime.now()
+    # buy&sell days
+    buy_sell_days = []
+    while stt_date < datetime(2030, 12, 31):
+        buy_sell_days.append(stt_date.strftime("%Y-%m-%d"))
+        stt_date += timedelta(days=t)
+    return buy_sell_days
 
-coin_list_y[0] = "NEAR"
-coin_list_y[1] = "FLOKI"
+buy_sell_days = get_buy_sell_days()
+
+coin_list_y[0] = "UNI"
 
 def jjobs() :
 
@@ -728,18 +738,6 @@ def jjobs() :
     
         # 시작 일자 기입
         stt_date = datetime.now().strftime("%Y-%m-%d")
-    
-        # buy_sell_days 생성
-        def get_buy_sell_days():
-            stt_date = datetime.now()
-            # buy&sell days
-            buy_sell_days = []
-            while stt_date < datetime(2030, 12, 31):
-                buy_sell_days.append(stt_date.strftime("%Y-%m-%d"))
-                stt_date += timedelta(days=t)
-            return buy_sell_days
-    
-        buy_sell_days = get_buy_sell_days()
     
         # ustt_utc와 uend_utc 설정 2019-01-10부터 가능
         todaydate = datetime.now()

@@ -448,6 +448,10 @@ coin_value_columns = [f'Coin{i + 1}_value' for i in range(n)]
 df_final = pd.DataFrame(
     columns=['Date'] + sum([list(pair) for pair in zip(coin_columns, coin_value_columns)], []) + ['USDT', 'Total_Asset',
                                                                                                   'Multiple'])
+
+# 시작 일자 기입
+stt_date = datetime.now().strftime("%Y-%m-%d")
+
 # buy_sell_days 생성
 def get_buy_sell_days():
     stt_date = datetime.now()
@@ -468,6 +472,7 @@ def jjobs():
     global yester
     global yesterdate
     global today_date
+    global stt_date
 
     try:
 
@@ -737,9 +742,6 @@ def jjobs():
         post_message(myToken, "#rebalancingmj", f"{today_date} 모든 코인 부가 정보 업데이트 완료.")
 
         ######## DF 생성하고, 매도/매수하기 #########
-
-        # 시작 일자 기입
-        stt_date = datetime.now().strftime("%Y-%m-%d")
 
         # ustt_utc와 uend_utc 설정 2019-01-10부터 가능
         todaydate = datetime.now()

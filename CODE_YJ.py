@@ -464,7 +464,7 @@ def get_buy_sell_days():
 
 buy_sell_days = get_buy_sell_days()
 
-coin_list_y[0] = "PENDLE"
+coin_list_y[0] = "ORDI"
 
 
 def jjobs():

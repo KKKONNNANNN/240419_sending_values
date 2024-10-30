@@ -1,0 +1,15 @@
+사용법
+0. 가상환경을 생성한다.
+
+# 가상환경 생성
+python3 -m venv myenv
+# 가상환경 활성화
+source myenv/bin/activate
+
+1. API.py에 정보를 입력한다.
+2. API.py를 이용해 data.json 을 만든다. (API KEY 등 생성 필요)
+3. CODE.py를 실행시킨다. 끝!!
+
+* 만약, data.json 파일이 있는 경우, 1. 2. 과정은 생략해도 괜찮다.
+* [1] [2] 등 신경 안써도 된다. CODE.py 만 실행하면 된다.
+* 09:01에 CODE.py(내거), 09:30에 CODE_MJ.py(민지거) 가 실행 된다.

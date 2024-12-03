@@ -899,6 +899,8 @@ def jjobs() :
                             # {today_date}_coin_list[i] 매수, 1/거래변수 금액만큼
                             # buy_coin_list에 추가
                             # 거래변수 -1
+                            # 잔액 부족으로 인한 매수 오류 막기 위해 5초 대기
+                            time.sleep(5)                            
                             buy_coin(coin_list[i], 1 / exchange)
                             buy_coin_list.append(coin_list[i])
                             exchange -= 1

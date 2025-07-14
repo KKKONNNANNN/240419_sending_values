@@ -28,3 +28,9 @@ pip3로 pyupbit 설치: pip3 install pyupbit
 백그라운드 실행: nohup python3 bitcoinAutoTrade.py > output.log &
 실행되고 있는지 확인: ps ax | grep .py
 프로세스 종료(PID는 ps ax | grep .py를 했을때 확인 가능): kill -9 PID
+
+
+* 만약 EC2를 다시 설정할 경우
+
+IAM 권한/role을 설정해서 S3_API 및 S3_SEC 를 사용하지 않고, 그냥 s3로 하도록 코드를 수정한다.(보안)
+S3의 directory 명을 제대로 확인한다.

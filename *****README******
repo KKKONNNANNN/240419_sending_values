@@ -34,3 +34,6 @@ pip3로 pyupbit 설치: pip3 install pyupbit
 
 IAM 권한/role을 설정해서 S3_API 및 S3_SEC 를 사용하지 않고, 그냥 s3로 하도록 코드를 수정한다.(보안)
 S3의 directory 명을 제대로 확인한다.
+
+* 250920 CODETEST.py 파일에 여러 오류 제거, 속도 빠르게 바꾼 코드 저장해놓음.(IAM ROLE 필요, S3 API 미사용)
+S3 directory 제대로 확인
